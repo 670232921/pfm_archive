@@ -58,6 +58,24 @@
     <ClInclude Include="..\include\ptpublic.h">
       <Filter>pfm\Include</Filter>
     </ClInclude>
+    <ClInclude Include="..\7z\CPP\7zip\IPassword.h">
+      <Filter>7z\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7z\CPP\7zip\IProgress.h">
+      <Filter>7z\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7z\CPP\7zip\IStream.h">
+      <Filter>7z\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7z\CPP\7zip\PropID.h">
+      <Filter>7z\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7z\CPP\7zip\Archive\IArchive.h">
+      <Filter>7z\h</Filter>
+    </ClInclude>
+    <ClInclude Include="7zheaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">

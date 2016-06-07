@@ -19,8 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{766802D3-CFAC-405E-9CF4-F659139375BA}</ProjectGuid>
-    <RootNamespace>pfm_archive</RootNamespace>
+    <ProjectGuid>{3F268D5A-0364-43FF-8290-D02229C206C2}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>My7zTest</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -28,27 +29,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -68,39 +69,57 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
@@ -109,41 +128,71 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="..\index.html" />
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\pfmkit-180-license.txt" />
-    <Text Include="..\pfmkit-180-readme.txt" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\7zip\Common\FileStreams.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Common\IntToString.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Common\MyString.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Common\MyVector.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Common\NewHandler.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Common\StringConvert.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Common\Wildcard.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Windows\FileDir.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Windows\FileFind.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Windows\FileIO.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Windows\FileName.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Windows\PropVariant.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Windows\PropVariantConv.h" />
+    <ClInclude Include="..\..\..\7z1600-src\CPP\Windows\PropVariantUtils.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\7z\CPP\7zip\Archive\IArchive.h" />
-    <ClInclude Include="..\7z\CPP\7zip\IPassword.h" />
-    <ClInclude Include="..\7z\CPP\7zip\IProgress.h" />
-    <ClInclude Include="..\7z\CPP\7zip\IStream.h" />
-    <ClInclude Include="..\7z\CPP\7zip\PropID.h" />
-    <ClInclude Include="..\include\pfmapi.h" />
-    <ClInclude Include="..\include\pfmapi.hxx" />
-    <ClInclude Include="..\include\pfmformatter.h" />
-    <ClInclude Include="..\include\pfmprotocol.h" />
-    <ClInclude Include="..\include\ptfactory1.h" />
-    <ClInclude Include="..\include\ptpublic.h" />
-    <ClInclude Include="7zheaders.h" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\7zip\Common\FileStreams.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Common\IntToString.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Common\MyString.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Common\MyVector.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Common\NewHandler.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Common\StringConvert.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Common\Wildcard.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Windows\FileDir.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Windows\FileFind.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Windows\FileIO.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Windows\FileName.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Windows\PropVariant.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Windows\PropVariantConv.cpp" />
+    <ClCompile Include="..\..\..\7z1600-src\CPP\Windows\PropVariantUtils.cpp" />
+    <ClCompile Include="7zTest.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
+    <Library Include="..\pfm_archive\7z.dll">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Library>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
