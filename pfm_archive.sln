@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pfm_archive", "pfm_archive\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hellofs", "samples\hellofs_cpp\hellofs.vcxproj", "{9D1D4CE4-5D0C-4D2F-B18D-A717AC4621B5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7zTest", "7zTest\7zTest.vcxproj", "{3F268D5A-0364-43FF-8290-D02229C206C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{9D1D4CE4-5D0C-4D2F-B18D-A717AC4621B5}.Release|x64.Build.0 = Release|x64
 		{9D1D4CE4-5D0C-4D2F-B18D-A717AC4621B5}.Release|x86.ActiveCfg = Release|Win32
 		{9D1D4CE4-5D0C-4D2F-B18D-A717AC4621B5}.Release|x86.Build.0 = Release|Win32
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Debug|x64.ActiveCfg = Debug|x64
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Debug|x64.Build.0 = Debug|x64
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Debug|x86.ActiveCfg = Debug|Win32
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Debug|x86.Build.0 = Debug|Win32
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Release|x64.ActiveCfg = Release|x64
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Release|x64.Build.0 = Release|x64
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Release|x86.ActiveCfg = Release|Win32
+		{3F268D5A-0364-43FF-8290-D02229C206C2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

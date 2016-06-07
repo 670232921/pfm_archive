@@ -132,6 +132,9 @@
     <ClInclude Include="..\include\ptfactory1.h" />
     <ClInclude Include="..\include\ptpublic.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

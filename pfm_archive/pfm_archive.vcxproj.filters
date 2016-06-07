@@ -19,6 +19,12 @@
     <Filter Include="pfm\Include">
       <UniqueIdentifier>{596ea4ba-d44d-4df2-9c10-5295d3601e72}</UniqueIdentifier>
     </Filter>
+    <Filter Include="7z">
+      <UniqueIdentifier>{7daf7ea6-cfb7-4aa7-ae29-c8deea54129d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\h">
+      <UniqueIdentifier>{acd222c5-7cc2-4206-96d8-f905357b880a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\index.html">
@@ -52,5 +58,10 @@
     <ClInclude Include="..\include\ptpublic.h">
       <Filter>pfm\Include</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
