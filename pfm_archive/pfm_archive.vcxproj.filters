@@ -76,9 +76,15 @@
     <ClInclude Include="7zheaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ArchiveVolume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArchiveVolume.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

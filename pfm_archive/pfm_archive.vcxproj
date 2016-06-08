@@ -141,8 +141,10 @@
     <ClInclude Include="..\include\ptfactory1.h" />
     <ClInclude Include="..\include\ptpublic.h" />
     <ClInclude Include="7zheaders.h" />
+    <ClInclude Include="ArchiveVolume.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ArchiveVolume.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
