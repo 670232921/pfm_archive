@@ -1,16 +1,24 @@
 #pragma once
 #include "../samples/common/portability.c"
 #include "../include/pfmapi.h"
+
+#include <map>
 #define CCALL PT_CCALL
+typedef unsigned int UInt32;
 
-
-struct ArchiveVolume : PfmFormatterDispatch
+class ArchiveVolume : public PfmFormatterDispatch
 {
+public:
+	UInt32 RootArchiveID = ~(UInt32)0;
+
 	PfmMarshaller* marshaller;
 	int64_t folderOpenId;
 	int64_t fileOpenId;
 
-	ArchiveVolume(void);
+	std::map<int64_t, unsigned int> _openIDArchiveIDMap;
+
+
+	ArchiveVolume(LPCWSTR filePath);
 	~ArchiveVolume(void);
 
 	// PfmFormatterDispatch
@@ -33,4 +41,13 @@ struct ArchiveVolume : PfmFormatterDispatch
 	void CCALL Access(PfmMarshallerAccessOp* op, void* formatterUse);
 	void CCALL ReadXattr(PfmMarshallerReadXattrOp* op, void* formatterUse);
 	void CCALL WriteXattr(PfmMarshallerWriteXattrOp* op, void* formatterUse);
+
+private:
+	PfmAttribs GetFileAttribute(UInt32 id);
+	UInt32 GetArchiveID(int64_t oid);
+	UInt32 GetArchiveID(PfmNamePart *parts, size_t count);
+	int64_t GetOpenID(UInt32 id);
+	inline void SaveID(int64_t oid, UInt32 id) { _openIDArchiveIDMap[oid] = id; }
+	inline bool IsOpened(int64_t oid) { return _openIDArchiveIDMap.find(oid) != _openIDArchiveIDMap.end(); }
+	size_t List(UInt32 id, PfmMarshallerListOp* op);
 };

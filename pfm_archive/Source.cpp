@@ -1,4 +1,3 @@
-#include "7zheaders.h"
 #include "ArchiveVolume.h"
 
 int wmain(int argc, const wchar_t*const* argv)
@@ -10,7 +9,7 @@ int wmain(int argc, const wchar_t*const* argv)
 	FD_T fromFormatterWrite = FD_INVALID;
 	PfmMountCreateParams mcp;
 	PfmMarshallerServeParams msp;
-	ArchiveVolume volume;
+	ArchiveVolume volume(L"TODO");
 
 	mcp.toFormatterWrite = FD_INVALID;
 	mcp.fromFormatterRead = FD_INVALID;

@@ -1,14 +1,9 @@
 #include "ArchiveVolume.h"
+//#include "7zheaders.h"
 
 static PfmOpenAttribs zeroOpenAttribs = {};
 static PfmAttribs zeroAttribs = {};
 static PfmMediaInfo zeroMediaInfo = {};
-
-static const wchar_t helloFileName[] = L"readme.txt";
-static const char helloData[] = "Hello world.\r\n";
-static const size_t helloDataSize = sizeof(helloData) - sizeof(helloData[0]);
-static const int64_t helloRootId = 2;
-static const int64_t helloFileId = 3;
 
 void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 {
@@ -19,25 +14,22 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 	int perr = 0;
 	bool existed = false;
 	PfmOpenAttribs openAttribs = zeroOpenAttribs;
-	int64_t parentFileId = 0;
-	const wchar_t* endName = 0;
+	int64_t parentFileId = 0; //todo
+	const wchar_t* endName = 0; //todo
 
 	if (!namePartCount)
 	{
-		if (!folderOpenId)
-		{
-			folderOpenId = newExistingOpenId;
-		}
 		existed = true;
-		openAttribs.openId = folderOpenId;
+		openAttribs.openId = newExistingOpenId;
 		openAttribs.openSequence = 1;
 		openAttribs.accessLevel = pfmAccessLevelReadData;
 		openAttribs.attribs.fileType = pfmFileTypeFolder;
-		openAttribs.attribs.fileId = helloRootId;
+		openAttribs.attribs.fileId = RootArchiveID;
+		SaveID(newExistingOpenId, RootArchiveID);
 	}
 	else if (namePartCount == 1)
 	{
-		if (sswcmpf(nameParts[0].name, helloFileName) != 0)
+		/*if (sswcmpf(nameParts[0].name, helloFileName) != 0)
 		{
 			perr = pfmErrorNotFound;
 		}
@@ -55,7 +47,7 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 			openAttribs.attribs.fileId = helloFileId;
 			openAttribs.attribs.fileSize = helloDataSize;
 			endName = helloFileName;
-		}
+		}*/
 	}
 	else
 	{
@@ -111,26 +103,17 @@ void CCALL ArchiveVolume::FlushFile(PfmMarshallerFlushFileOp* op, void* formatte
 	{
 		perr = pfmErrorAccessDenied;
 	}
-	else if (openId == folderOpenId)
+	else if (!IsOpened(openId))
 	{
-		openAttribs.openId = folderOpenId;
-		openAttribs.openSequence = 1;
-		openAttribs.accessLevel = pfmAccessLevelReadData;
-		openAttribs.attribs.fileType = pfmFileTypeFolder;
-		openAttribs.attribs.fileId = helloRootId;
-	}
-	else if (openId == fileOpenId)
-	{
-		openAttribs.openId = fileOpenId;
-		openAttribs.openSequence = 1;
-		openAttribs.accessLevel = pfmAccessLevelReadData;
-		openAttribs.attribs.fileType = pfmFileTypeFile;
-		openAttribs.attribs.fileId = helloFileId;
-		openAttribs.attribs.fileSize = helloDataSize;
+		perr = pfmErrorNotFound;
+		// todo log
 	}
 	else
 	{
-		perr = pfmErrorNotFound;
+		openAttribs.openId = openId;
+		openAttribs.openSequence = 1;
+		openAttribs.accessLevel = pfmAccessLevelReadData;
+		openAttribs.attribs = GetFileAttribute(GetArchiveID(openId));
 	}
 
 	op->Complete(perr, &openAttribs, 0);
@@ -142,16 +125,17 @@ void CCALL ArchiveVolume::List(PfmMarshallerListOp* op, void* formatterUse)
 	int perr = 0;
 	PfmAttribs attribs = zeroAttribs;
 
-	if (openId != folderOpenId)
+	if (!IsOpened(openId))
 	{
 		perr = pfmErrorAccessDenied;
 	}
 	else
 	{
-		attribs.fileType = pfmFileTypeFile;
+		List(GetArchiveID(openId), op);
+		/*attribs.fileType = pfmFileTypeFile;
 		attribs.fileId = helloFileId;
 		attribs.fileSize = helloDataSize;
-		op->Add(&attribs, helloFileName);
+		op->Add(&attribs, helloFileName);*/
 	}
 
 	op->Complete(perr, true/*noMore*/);
@@ -171,22 +155,13 @@ void CCALL ArchiveVolume::Read(PfmMarshallerReadOp* op, void* formatterUse)
 	int perr = 0;
 	size_t actualSize = 0;
 
-	if (openId != fileOpenId)
+	if (!IsOpened(openId))
 	{
 		perr = pfmErrorAccessDenied;
 	}
 	else
 	{
-		actualSize = requestedSize;
-		if (fileOffset > helloDataSize)
-		{
-			actualSize = 0;
-		}
-		else if (fileOffset + requestedSize > helloDataSize)
-		{
-			actualSize = static_cast<size_t>(helloDataSize - fileOffset);
-		}
-		memcpy(data, helloData, actualSize);
+		// todo read
 	}
 
 	op->Complete(perr, actualSize);
@@ -204,7 +179,8 @@ void CCALL ArchiveVolume::SetSize(PfmMarshallerSetSizeOp* op, void* formatterUse
 
 void CCALL ArchiveVolume::Capacity(PfmMarshallerCapacityOp* op, void* formatterUse)
 {
-	op->Complete(pfmErrorSuccess, helloDataSize/*totalCapacity*/, 0/*availableCapacity*/);
+	op->Complete(pfmErrorSuccess,
+		GetFileAttribute(GetArchiveID(op->OpenId())).fileSize/*totalCapacity*/, 0/*availableCapacity*/);
 }
 
 void CCALL ArchiveVolume::FlushMedia(PfmMarshallerFlushMediaOp* op, void* formatterUse)
@@ -222,6 +198,7 @@ void CCALL ArchiveVolume::MediaInfo(PfmMarshallerMediaInfoOp* op, void* formatte
 	PfmMediaInfo mediaInfo = zeroMediaInfo;
 
 	op->Complete(pfmErrorSuccess, &mediaInfo, L"hellofs"/*mediaLabel*/);
+	// todo filename
 }
 
 void CCALL ArchiveVolume::Access(PfmMarshallerAccessOp* op, void* formatterUse)
@@ -230,28 +207,17 @@ void CCALL ArchiveVolume::Access(PfmMarshallerAccessOp* op, void* formatterUse)
 	int perr = 0;
 	PfmOpenAttribs openAttribs = zeroOpenAttribs;
 
-	if (openId == folderOpenId)
+	if (!IsOpened(openId))
 	{
-		openAttribs.openId = folderOpenId;
-		openAttribs.openSequence = 1;
-		openAttribs.accessLevel = pfmAccessLevelReadData;
-		openAttribs.attribs.fileType = pfmFileTypeFolder;
-		openAttribs.attribs.fileId = helloRootId;
-		perr = 0;
-	}
-	else if (openId == fileOpenId)
-	{
-		openAttribs.openId = fileOpenId;
-		openAttribs.openSequence = 1;
-		openAttribs.accessLevel = pfmAccessLevelReadData;
-		openAttribs.attribs.fileType = pfmFileTypeFile;
-		openAttribs.attribs.fileId = helloFileId;
-		openAttribs.attribs.fileSize = helloDataSize;
-		perr = 0;
+		perr = pfmErrorNotFound;
 	}
 	else
 	{
-		perr = pfmErrorNotFound;
+		openAttribs.openId = openId;
+		openAttribs.openSequence = 1;
+		openAttribs.accessLevel = pfmAccessLevelReadData;
+		openAttribs.attribs = GetFileAttribute(GetArchiveID(openId));
+		perr = 0;
 	}
 
 	op->Complete(perr, &openAttribs, 0);
@@ -267,8 +233,9 @@ void CCALL ArchiveVolume::WriteXattr(PfmMarshallerWriteXattrOp* op, void* format
 	op->Complete(pfmErrorAccessDenied, 0/*transferredSize*/);
 }
 
-ArchiveVolume::ArchiveVolume(void)
+ArchiveVolume::ArchiveVolume(LPCWSTR filePath)
 {
+	// todo filepath
 	marshaller = 0;
 	folderOpenId = 0;
 	fileOpenId = 0;
@@ -277,4 +244,29 @@ ArchiveVolume::ArchiveVolume(void)
 ArchiveVolume::~ArchiveVolume(void)
 {
 	ASSERT(!marshaller);
+}
+
+PfmAttribs ArchiveVolume::GetFileAttribute(UInt32 id)
+{
+	return PfmAttribs();
+}
+
+UInt32 ArchiveVolume::GetArchiveID(int64_t oid)
+{
+	return UInt32();
+}
+
+UInt32 ArchiveVolume::GetArchiveID(PfmNamePart * parts, size_t count)
+{
+	return UInt32();
+}
+
+int64_t ArchiveVolume::GetOpenID(UInt32 id)
+{
+	return int64_t();
+}
+
+size_t ArchiveVolume::List(UInt32 id, PfmMarshallerListOp* op)
+{
+	return size_t();
 }
