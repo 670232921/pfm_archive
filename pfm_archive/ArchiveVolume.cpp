@@ -218,14 +218,26 @@ void CCALL ArchiveVolume::SetSize(PfmMarshallerSetSizeOp* op, void* formatterUse
 
 void CCALL ArchiveVolume::Capacity(PfmMarshallerCapacityOp* op, void* formatterUse)
 {
-	if (op->OpenId() == 0)
+	auto oid = op->OpenId();
+	if (oid == 0)
 	{
 		op->Complete(pfmErrorSuccess, _size/*totalCapacity*/, 0/*availableCapacity*/); // todo
 	}
+	else if (!IsOpened(op->OpenId()))
+	{
+		op->Complete(pfmErrorNotFound, 0, 0);
+	}
 	else
 	{
-		op->Complete(pfmErrorSuccess,
-			GetFileAttribute(GetArchiveID(op->OpenId())).fileSize/*totalCapacity*/, 0/*availableCapacity*/);
+		auto id = GetArchiveID(oid);
+		if (id == _archive.RootArchiveID)
+		{
+			op->Complete(pfmErrorSuccess, _size/*totalCapacity*/, 0/*availableCapacity*/); // todo
+		}
+		else
+		{
+			op->Complete(pfmErrorSuccess, GetFileAttribute(id).fileSize/*totalCapacity*/, 0/*availableCapacity*/);
+		}
 	}
 }
 
@@ -372,13 +384,13 @@ size_t ArchiveVolume::List(UInt32 id, PfmMarshallerListOp* op)
 		return ret;
 	}
 
-	wstring parentPath = GetPathPro(id);
+	wstring parentPath = GetPathPro(id) + L'\\';
 	for (UInt32 i = 0; i < _archive.GetCount(); i++)
 	{
 		wstring name = GetPathPro(i);
-		if (name != parentPath && name.compare(0, parentPath.length(), parentPath) == 0)
+		if (name.compare(0, parentPath.length(), parentPath) == 0)
 		{
-			wstring endname = name.substr(parentPath.length() + 1);
+			wstring endname = name.substr(parentPath.length());
 			if (endname.find(L'\\') == endname.npos)
 			{
 				PfmAttribs att = GetFileAttribute(i);

@@ -114,6 +114,8 @@ void ArchiveWrap::CreateFolders()
 		all.push_back(GetPathPro(i));
 	}
 
+	sort(all.begin(), all.end());
+
 	for (UInt32 i = 0; i < _fileCount; i++)
 	{
 		wstring temp(all[i]);
@@ -121,7 +123,7 @@ void ArchiveWrap::CreateFolders()
 		while ((pos = temp.find_last_of(L'\\')) != temp.npos)
 		{
 			temp = temp.substr(0, pos);
-			if (find(all.cbegin(), all.cend(), temp) != all.cend() ||
+			if (binary_search(all.cbegin(), all.cend(), temp) ||
 				find(_folders.cbegin(), _folders.cend(), temp) != _folders.cend())
 			{
 				break;
