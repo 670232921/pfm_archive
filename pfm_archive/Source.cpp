@@ -1,4 +1,4 @@
-#include "ArchiveVolume.h"
+#include "pfmHeader.h"
 
 int wmain(int argc, const wchar_t*const* argv)
 {
@@ -9,11 +9,12 @@ int wmain(int argc, const wchar_t*const* argv)
 	FD_T fromFormatterWrite = FD_INVALID;
 	PfmMountCreateParams mcp;
 	PfmMarshallerServeParams msp;
-	ArchiveVolume volume(L"TODO");
+	PfmFormatterDispatch* volume = GetPfmFormatterDispatch(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
+	PfmMarshaller* marshaller = 0;
 
 	mcp.toFormatterWrite = FD_INVALID;
 	mcp.fromFormatterRead = FD_INVALID;
-	msp.dispatch = &volume;
+	msp.dispatch = volume;
 	msp.formatterName = "hellofs";
 	msp.toFormatterRead = FD_INVALID;
 	msp.fromFormatterWrite = FD_INVALID;
@@ -42,7 +43,7 @@ int wmain(int argc, const wchar_t*const* argv)
 
 	if (!err)
 	{
-		err = PfmMarshallerFactory(&volume.marshaller);
+		err = PfmMarshallerFactory(&marshaller);
 		if (err)
 		{
 			printf("ERROR: %i Unable to create marshaller.\n", err);
@@ -80,17 +81,17 @@ int wmain(int argc, const wchar_t*const* argv)
 	{
 		// If tracemon is installed and running then diagnostic
 		// messsages can be viewed in the "hellofs" channel.
-		volume.marshaller->SetTrace(L"hellofs");
+		marshaller->SetTrace(L"hellofs");
 		// Also send diagnostic messages to stdout. This can slow
 		// things down quite a bit.
-		volume.marshaller->SetStatus(stdout_fd());
+		marshaller->SetStatus(stdout_fd());
 
 		// The marshaller uses alertable I/O, so process can be
 		// exited via ctrl+c.
 		printf("Press CTRL+C to exit.\n");
 		// The marshaller serve function will return at unmount or
 		// if driver disconnects.
-		volume.marshaller->ServeDispatch(&msp);
+		marshaller->ServeDispatch(&msp);
 	}
 
 	close_fd(msp.toFormatterRead);
@@ -103,11 +104,13 @@ int wmain(int argc, const wchar_t*const* argv)
 	{
 		pfm->Release();
 	}
-	if (volume.marshaller)
+	if (marshaller)
 	{
-		volume.marshaller->Release();
-		volume.marshaller = 0;
+		marshaller->Release();
+		marshaller = 0;
 	}
 	PfmApiUnload();
+
+	delete volume;
 	return err;
 }

@@ -1,4 +1,3 @@
-#include "7zheaders.h"
 #include "ArchiveVolume.h"
 #include <iostream>
 #include <fstream>
@@ -17,6 +16,12 @@ DEFINE_GUID(CLSID_CFormat7z,
 static PfmOpenAttribs zeroOpenAttribs = {};
 static PfmAttribs zeroAttribs = {};
 static PfmMediaInfo zeroMediaInfo = {};
+
+PfmFormatterDispatch* GetPfmFormatterDispatch(wchar_t * name)
+{
+	return new ArchiveVolume(name);
+}
+
 
 class InStream : public IInStream, public CMyUnknownImp
 {
@@ -357,7 +362,7 @@ PfmAttribs ArchiveVolume::GetFileAttribute(UInt32 id)
 
 	_ret = _archive->GetProperty(id, kpidSize, &v);
 	CHECKHRESULT(_ret);
-	if (v.vt == VT_I8)
+	if (v.vt == VT_UI8)
 		att.fileSize = v.lVal;
 	CleanVAR(&v);
 	return att;

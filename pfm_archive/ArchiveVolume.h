@@ -1,6 +1,6 @@
 #pragma once
-#include "../samples/common/portability.c"
-#include "../include/pfmapi.h"
+#include "7zheaders.h"
+#include "pfmHeader.h"
 
 #include <map>
 #define CCALL PT_CCALL
