@@ -15,7 +15,7 @@ int wmain(int argc, const wchar_t*const* argv)
 	mcp.toFormatterWrite = FD_INVALID;
 	mcp.fromFormatterRead = FD_INVALID;
 	msp.dispatch = volume;
-	msp.formatterName = "hellofs";
+	msp.formatterName = "Archive";
 	msp.toFormatterRead = FD_INVALID;
 	msp.fromFormatterWrite = FD_INVALID;
 

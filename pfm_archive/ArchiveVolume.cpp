@@ -124,7 +124,11 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 	else
 	{
 		UInt32 id = GetArchiveID(nameParts, namePartCount);
-		if (namePartCount == 1)
+		if (id == RootArchiveID - 1)
+		{
+			perr = pfmErrorNotFound;
+		}
+		else if (namePartCount == 1)
 		{
 			parentFileId = RootArchiveID;
 		}
