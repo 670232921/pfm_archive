@@ -98,7 +98,7 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 	bool existed = false;
 	PfmOpenAttribs openAttribs = zeroOpenAttribs;
 	int64_t parentFileId = 0;
-	const wchar_t* endName = 0;
+	wstring endName;
 
 	if (!namePartCount)
 	{
@@ -154,27 +154,8 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 			openAttribs.openSequence = 1;
 			openAttribs.accessLevel = pfmAccessLevelReadData;
 			openAttribs.attribs = GetFileAttribute(id);
-			endName = nameParts[namePartCount].name;
+			endName = GetEndName(id);
 		}
-		/*if (sswcmpf(nameParts[0].name, helloFileName) != 0)
-		{
-			perr = pfmErrorNotFound;
-		}
-		else
-		{
-			if (!fileOpenId)
-			{
-				fileOpenId = newExistingOpenId;
-			}
-			existed = true;
-			openAttribs.openId = fileOpenId;
-			openAttribs.openSequence = 1;
-			openAttribs.accessLevel = pfmAccessLevelReadData;
-			openAttribs.attribs.fileType = pfmFileTypeFile;
-			openAttribs.attribs.fileId = helloFileId;
-			openAttribs.attribs.fileSize = helloDataSize;
-			endName = helloFileName;
-		}*/
 	}
 
 	if (perr == pfmErrorNotFound && createFileType != 0)
@@ -182,7 +163,7 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 		perr = pfmErrorAccessDenied;
 	}
 
-	op->Complete(perr, existed, &openAttribs, parentFileId, endName, 0, 0, 0, 0);
+	op->Complete(perr, existed, &openAttribs, parentFileId, endName.c_str(), 0, 0, 0, 0);
 }
 
 void CCALL ArchiveVolume::Replace(PfmMarshallerReplaceOp* op, void* formatterUse)
@@ -305,7 +286,7 @@ void CCALL ArchiveVolume::Capacity(PfmMarshallerCapacityOp* op, void* formatterU
 {
 	if (op->OpenId() == 0)
 	{
-		op->Complete(pfmErrorSuccess, 0/*totalCapacity*/, 0/*availableCapacity*/); // todo
+		op->Complete(pfmErrorSuccess, _size/*totalCapacity*/, 0/*availableCapacity*/); // todo
 	}
 	else
 	{
@@ -328,8 +309,7 @@ void CCALL ArchiveVolume::MediaInfo(PfmMarshallerMediaInfoOp* op, void* formatte
 {
 	PfmMediaInfo mediaInfo = zeroMediaInfo;
 
-	op->Complete(pfmErrorSuccess, &mediaInfo, L"hellofs"/*mediaLabel*/);
-	// todo filename
+	op->Complete(pfmErrorSuccess, &mediaInfo, GetEndName(_fileName).c_str()/*mediaLabel*/);
 }
 
 void CCALL ArchiveVolume::Access(PfmMarshallerAccessOp* op, void* formatterUse)
@@ -367,6 +347,15 @@ void CCALL ArchiveVolume::WriteXattr(PfmMarshallerWriteXattrOp* op, void* format
 ArchiveVolume::ArchiveVolume(LPCWSTR filePath)
 {
 	_fileName = filePath;
+
+	{
+		wifstream in(filePath, std::ifstream::ate | std::ifstream::binary);
+		if (in.is_open())
+		{
+			_size = in.tellg();
+			in.close();
+		}
+	}
 
 	_dll = ::LoadLibrary(DllName);
 	CHECKNULL(_dll);
@@ -500,6 +489,26 @@ wstring ArchiveVolume::GetPathPro(UInt32 id)
 		ret = v.bstrVal;
 	CleanVAR(&v);
 	return ret;
+}
+
+std::wstring ArchiveVolume::GetEndName(UInt32 id)
+{
+	wstring path = GetPathPro(id);
+	return GetEndName(path);
+}
+
+std::wstring ArchiveVolume::GetEndName(wstring path)
+{
+
+	size_t pos = path.rfind(L'\\');
+	if (pos == path.npos)
+	{
+		return path;
+	}
+	else
+	{
+		return path.substr(pos + 1);
+	}
 }
 
 void ArchiveVolume::CleanVAR(PROPVARIANT *prop)

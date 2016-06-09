@@ -42,6 +42,7 @@ private:
 	HRESULT _ret = 0;
 	std::wstring _fileName;
 	UInt32 _fileCount = 0;
+	size_t _size = 0;
 	std::map<int64_t, UInt32> _openIDArchiveIDMap;
 	CMyComPtr<IInArchive> _archive;
 	CMyComPtr<IInStream> _inStream;
@@ -58,5 +59,7 @@ private:
 	size_t List(UInt32 id, PfmMarshallerListOp* op);
 
 	std::wstring GetPathPro(UInt32 id);
+	std::wstring GetEndName(UInt32 id);
+	std::wstring GetEndName(std::wstring path);
 	void ArchiveVolume::CleanVAR(PROPVARIANT *prop);
 };
