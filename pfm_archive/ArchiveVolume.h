@@ -53,7 +53,6 @@ private:
 	bool IsOpenedId(UInt32 id);
 	size_t List(UInt32 id, PfmMarshallerListOp* op);
 
-	std::wstring GetPathPro(UInt32 id);
 	std::wstring GetEndName(UInt32 id);
 	std::wstring GetEndName(std::wstring path);
 };

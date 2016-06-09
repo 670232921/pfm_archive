@@ -75,6 +75,7 @@ public:
 	}
 };
 
+wstring const ArchiveWrap::RootName(L"Root");
 
 ArchiveWrap::~ArchiveWrap()
 {
@@ -102,18 +103,34 @@ bool ArchiveWrap::Init(LPCWSTR filePath)
 	ret = _archive->GetNumberOfItems(&_fileCount);
 	CHECKHRESULT(ret);
 
-	CreateFolders();
+	CreateFilesAndFolders();
 	return true;
 }
 
-void ArchiveWrap::CreateFolders()
+const wstring & ArchiveWrap::GetPathProp(UInt32 index)
 {
-	vector<wstring> all;
+	if (index < _fileCount)
+	{
+		return _files[index];
+	}
+	else if (index < _folders.size() + _fileCount)
+	{
+		return _folders[index - _fileCount];
+	}
+	else
+	{
+		return RootName;
+	}
+}
+
+void ArchiveWrap::CreateFilesAndFolders()
+{
 	for (UInt32 i = 0; i < _fileCount; i++)
 	{
-		all.push_back(GetPathPro(i));
+		_files.push_back(GetPathFromArchive(i));
 	}
 
+	vector<wstring> all(_files);
 	sort(all.begin(), all.end());
 
 	for (UInt32 i = 0; i < _fileCount; i++)
@@ -203,7 +220,7 @@ void ArchiveWrap::CleanVAR(PROPVARIANT *prop)
 	// PropVariantClear can clear VT_BLOB.
 }
 
-wstring ArchiveWrap::GetPathPro(UInt32 id)
+wstring ArchiveWrap::GetPathFromArchive(UInt32 id)
 {
 	PROPVARIANT v;
 	wstring ret;

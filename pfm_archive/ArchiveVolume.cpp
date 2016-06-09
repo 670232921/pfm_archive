@@ -340,7 +340,7 @@ UInt32 ArchiveVolume::GetArchiveID(const PfmNamePart * parts, size_t count)
 
 	for (UInt32 i = 0; i < _archive.GetCount(); i++)
 	{
-		if (GetPathPro(i) == s)
+		if (_archive.GetPathProp(i) == s)
 			return i;
 	}
 	return _archive.RootArchiveID - 1; // not found
@@ -373,7 +373,7 @@ size_t ArchiveVolume::List(UInt32 id, PfmMarshallerListOp* op)
 	{
 		for (UInt32 i = 0; i < _archive.GetCount(); i++)
 		{
-			wstring name = GetPathPro(i);
+			wstring name = _archive.GetPathProp(i);
 			if (name.find(L'\\') == name.npos)
 			{
 				PfmAttribs att = GetFileAttribute(i);
@@ -384,10 +384,10 @@ size_t ArchiveVolume::List(UInt32 id, PfmMarshallerListOp* op)
 		return ret;
 	}
 
-	wstring parentPath = GetPathPro(id) + L'\\';
+	wstring parentPath = _archive.GetPathProp(id) + L'\\';
 	for (UInt32 i = 0; i < _archive.GetCount(); i++)
 	{
-		wstring name = GetPathPro(i);
+		wstring name = _archive.GetPathProp(i);
 		if (name.compare(0, parentPath.length(), parentPath) == 0)
 		{
 			wstring endname = name.substr(parentPath.length());
@@ -403,21 +403,9 @@ size_t ArchiveVolume::List(UInt32 id, PfmMarshallerListOp* op)
 	return ret;
 }
 
-wstring ArchiveVolume::GetPathPro(UInt32 id)
-{
-	PROPVARIANT v;
-	wstring ret;
-	_ret = _archive.GetProperty(id, kpidPath, &v);
-	CHECKHRESULT(_ret);
-	if (v.vt == VT_BSTR)
-		ret = v.bstrVal;
-	ArchiveWrap::CleanVAR(&v);
-	return ret;
-}
-
 std::wstring ArchiveVolume::GetEndName(UInt32 id)
 {
-	wstring path = GetPathPro(id);
+	wstring path = _archive.GetPathProp(id);
 	return GetEndName(path);
 }
 
