@@ -50,10 +50,11 @@ private:
 
 	PfmAttribs GetFileAttribute(UInt32 id);
 	UInt32 GetArchiveID(int64_t oid) { return _openIDArchiveIDMap[oid]; }
-	UInt32 GetArchiveID(PfmNamePart *parts, size_t count);
+	UInt32 GetArchiveID(const PfmNamePart *parts, size_t count);
 	int64_t GetOpenID(UInt32 id);
 	inline void SaveID(int64_t oid, UInt32 id) { _openIDArchiveIDMap[oid] = id; }
 	inline bool IsOpened(int64_t oid) { return _openIDArchiveIDMap.find(oid) != _openIDArchiveIDMap.end(); }
+	bool IsOpenedId(UInt32 id);
 	size_t List(UInt32 id, PfmMarshallerListOp* op);
 
 	std::wstring &GetPathPro(UInt32 id);

@@ -97,8 +97,8 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 	int perr = 0;
 	bool existed = false;
 	PfmOpenAttribs openAttribs = zeroOpenAttribs;
-	int64_t parentFileId = 0; //todo
-	const wchar_t* endName = 0; //todo
+	int64_t parentFileId = 0;
+	const wchar_t* endName = 0;
 
 	if (!namePartCount)
 	{
@@ -109,9 +109,44 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 		openAttribs.attribs.fileType = pfmFileTypeFolder;
 		openAttribs.attribs.fileId = RootArchiveID;
 		SaveID(newExistingOpenId, RootArchiveID);
+
+		endName = L"Root"; // todo
 	}
-	else if (namePartCount == 1)
+	else
 	{
+		UInt32 id = GetArchiveID(nameParts, namePartCount);
+		if (namePartCount == 1)
+		{
+			parentFileId = RootArchiveID;
+		}
+		else
+		{
+			parentFileId = GetArchiveID(nameParts, namePartCount - 1);
+		}
+
+		if (id == RootArchiveID - 1 || parentFileId == RootArchiveID - 1)
+		{
+			perr = pfmErrorNotFound;
+		}
+		else
+		{
+			existed = true;
+
+			if (IsOpenedId(id))
+			{
+				openAttribs.openId = GetOpenID(id);
+			}
+			else
+			{
+				openAttribs.openId = newExistingOpenId;
+				SaveID(newExistingOpenId, id);
+			}
+
+			openAttribs.openSequence = 1;
+			openAttribs.accessLevel = pfmAccessLevelReadData;
+			openAttribs.attribs = GetFileAttribute(id);
+			endName = nameParts[namePartCount].name;
+		}
 		/*if (sswcmpf(nameParts[0].name, helloFileName) != 0)
 		{
 			perr = pfmErrorNotFound;
@@ -132,10 +167,7 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 			endName = helloFileName;
 		}*/
 	}
-	else
-	{
-		perr = pfmErrorParentNotFound;
-	}
+
 	if (perr == pfmErrorNotFound && createFileType != 0)
 	{
 		perr = pfmErrorAccessDenied;
@@ -368,7 +400,7 @@ PfmAttribs ArchiveVolume::GetFileAttribute(UInt32 id)
 	return att;
 }
 
-UInt32 ArchiveVolume::GetArchiveID(PfmNamePart * parts, size_t count)
+UInt32 ArchiveVolume::GetArchiveID(const PfmNamePart * parts, size_t count)
 {
 	wstring s = parts[0].name;
 	for (size_t i = 1; i < count; i++)
@@ -382,7 +414,7 @@ UInt32 ArchiveVolume::GetArchiveID(PfmNamePart * parts, size_t count)
 		if (GetPathPro(i) == s)
 			return i;
 	}
-	throw;
+	return RootArchiveID - 1; // not found
 }
 
 int64_t ArchiveVolume::GetOpenID(UInt32 id)
@@ -395,9 +427,51 @@ int64_t ArchiveVolume::GetOpenID(UInt32 id)
 	throw;
 }
 
+bool ArchiveVolume::IsOpenedId(UInt32 id)
+{
+	for each(auto item in _openIDArchiveIDMap)
+	{
+		if (item.second == id)
+			return true;
+	}
+	return false;
+}
+
 size_t ArchiveVolume::List(UInt32 id, PfmMarshallerListOp* op)
 {
-	return size_t();
+	size_t ret = 0;
+	if (id == RootArchiveID)
+	{
+		for (UInt32 i = 0; i < _fileCount; i++)
+		{
+			wstring name = GetPathPro(i);
+			if (name.find(L'\\') == name.npos)
+			{
+				PfmAttribs att = GetFileAttribute(i);
+				op->Add(&att, name.c_str());
+				ret++;
+			}
+		}
+		return ret;
+	}
+
+	wstring parentPath = GetPathPro(id);
+	for (UInt32 i = 0; i < _fileCount; i++)
+	{
+		wstring name = GetPathPro(i);
+		if (name != parentPath && name.compare(0, parentPath.length(), parentPath) == 0)
+		{
+			wstring endname = name.substr(parentPath.length() + 1);
+			if (endname.find(L'\\') == endname.npos)
+			{
+				PfmAttribs att = GetFileAttribute(i);
+				op->Add(&att, endname.c_str());
+				ret++;
+			}
+		}
+	}
+
+	return ret;
 }
 
 wstring &ArchiveVolume::GetPathPro(UInt32 id)
