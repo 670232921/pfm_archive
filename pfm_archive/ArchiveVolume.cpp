@@ -103,12 +103,21 @@ void CCALL ArchiveVolume::Open(PfmMarshallerOpenOp* op, void* formatterUse)
 	if (!namePartCount)
 	{
 		existed = true;
-		openAttribs.openId = newExistingOpenId;
+
+		if (IsOpenedId(RootArchiveID))
+		{
+			openAttribs.openId = GetOpenID(RootArchiveID);
+		}
+		else
+		{
+			SaveID(newExistingOpenId, RootArchiveID);
+			openAttribs.openId = newExistingOpenId;
+		}
+
 		openAttribs.openSequence = 1;
 		openAttribs.accessLevel = pfmAccessLevelReadData;
 		openAttribs.attribs.fileType = pfmFileTypeFolder;
 		openAttribs.attribs.fileId = RootArchiveID;
-		SaveID(newExistingOpenId, RootArchiveID);
 
 		endName = L"Root"; // todo
 	}
@@ -294,8 +303,15 @@ void CCALL ArchiveVolume::SetSize(PfmMarshallerSetSizeOp* op, void* formatterUse
 
 void CCALL ArchiveVolume::Capacity(PfmMarshallerCapacityOp* op, void* formatterUse)
 {
-	op->Complete(pfmErrorSuccess,
-		GetFileAttribute(GetArchiveID(op->OpenId())).fileSize/*totalCapacity*/, 0/*availableCapacity*/);
+	if (op->OpenId() == 0)
+	{
+		op->Complete(pfmErrorSuccess, 0/*totalCapacity*/, 0/*availableCapacity*/); // todo
+	}
+	else
+	{
+		op->Complete(pfmErrorSuccess,
+			GetFileAttribute(GetArchiveID(op->OpenId())).fileSize/*totalCapacity*/, 0/*availableCapacity*/);
+	}
 }
 
 void CCALL ArchiveVolume::FlushMedia(PfmMarshallerFlushMediaOp* op, void* formatterUse)
@@ -474,7 +490,7 @@ size_t ArchiveVolume::List(UInt32 id, PfmMarshallerListOp* op)
 	return ret;
 }
 
-wstring &ArchiveVolume::GetPathPro(UInt32 id)
+wstring ArchiveVolume::GetPathPro(UInt32 id)
 {
 	PROPVARIANT v;
 	wstring ret;

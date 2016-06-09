@@ -36,7 +36,7 @@ public:
 	void CCALL WriteXattr(PfmMarshallerWriteXattrOp* op, void* formatterUse);
 
 private:
-	UInt32 RootArchiveID = ~(UInt32)0;
+	UInt32 RootArchiveID = min(~(UInt32)0, ~(int64_t)0);
 	LPCWSTR DllName = L"7z.dll";
 
 	HRESULT _ret = 0;
@@ -57,6 +57,6 @@ private:
 	bool IsOpenedId(UInt32 id);
 	size_t List(UInt32 id, PfmMarshallerListOp* op);
 
-	std::wstring &GetPathPro(UInt32 id);
+	std::wstring GetPathPro(UInt32 id);
 	void ArchiveVolume::CleanVAR(PROPVARIANT *prop);
 };
