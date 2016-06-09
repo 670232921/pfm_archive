@@ -1,6 +1,7 @@
 #include "ArchiveWrap.h"
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 using namespace std;
 
 #define WAIT
@@ -74,22 +75,6 @@ public:
 	}
 };
 
-namespace
-{
-	vector<wstring> SplitPath(wstring full)
-	{
-		wstring temp(full);
-		vector<wstring> ret;
-		size_t pos = 0;
-		while ((pos = temp.find_last_of(L'\\')) != temp.npos)
-		{
-			temp = temp.substr(0, pos);
-			ret.push_back(temp);
-		}
-
-		return ret;
-	}
-}
 
 ArchiveWrap::~ArchiveWrap()
 {
@@ -123,18 +108,26 @@ bool ArchiveWrap::Init(LPCWSTR filePath)
 
 void ArchiveWrap::CreateFolders()
 {
+	vector<wstring> all;
 	for (UInt32 i = 0; i < _fileCount; i++)
 	{
-		for each(wstring item in SplitPath(GetPathPro(i)))
+		all.push_back(GetPathPro(i));
+	}
+
+	for (UInt32 i = 0; i < _fileCount; i++)
+	{
+		wstring temp(all[i]);
+		size_t pos = 0;
+		while ((pos = temp.find_last_of(L'\\')) != temp.npos)
 		{
-			if (!IsExitInFile(item) && !IsExitInFolder(item))
-			{
-				_folders.push_back(item);
-			}
-			else
+			temp = temp.substr(0, pos);
+			if (find(all.cbegin(), all.cend(), temp) != all.cend() ||
+				find(_folders.cbegin(), _folders.cend(), temp) != _folders.cend())
 			{
 				break;
 			}
+
+			_folders.push_back(temp);
 		}
 	}
 }
@@ -167,12 +160,12 @@ STDMETHODIMP ArchiveWrap::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *
 		{
 			throw;
 		}
-		return S_OK;
 	}
 	else
 	{
 		return E_FAIL;
 	}
+	return S_OK;
 }
 
 void ArchiveWrap::CleanVAR(PROPVARIANT *prop)
@@ -218,24 +211,4 @@ wstring ArchiveWrap::GetPathPro(UInt32 id)
 		ret = v.bstrVal;
 	ArchiveWrap::CleanVAR(&v);
 	return ret;
-}
-
-inline bool ArchiveWrap::IsExitInFile(const wstring & path)
-{
-	for (UInt32 i = 0; i < _fileCount; i++)
-	{
-		if (path == GetPathPro(i))
-			return true;
-	}
-	return false;
-}
-
-inline bool ArchiveWrap::IsExitInFolder(const wstring & path)
-{
-	for each (auto item in _folders)
-	{
-		if (path == item)
-			return true;
-	}
-	return false;
 }

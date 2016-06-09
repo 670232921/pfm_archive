@@ -28,7 +28,4 @@ private:
 
 	void CreateFolders();
 	std::wstring GetPathPro(UInt32 id);
-
-	inline bool IsExitInFile(const std::wstring &path);
-	inline bool IsExitInFolder(const std::wstring &path);
 };
