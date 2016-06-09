@@ -9,17 +9,10 @@ typedef unsigned int UInt32;
 class ArchiveVolume : public PfmFormatterDispatch
 {
 public:
-	UInt32 RootArchiveID = ~(UInt32)0;
-
-	PfmMarshaller* marshaller;
-	int64_t folderOpenId;
-	int64_t fileOpenId;
-
-	std::map<int64_t, unsigned int> _openIDArchiveIDMap;
-
-
 	ArchiveVolume(LPCWSTR filePath);
 	~ArchiveVolume(void);
+
+	bool Aviliable() { return !_archive && _ret == 0; }
 
 	// PfmFormatterDispatch
 	void CCALL Open(PfmMarshallerOpenOp* op, void* formatterUse);
@@ -43,11 +36,26 @@ public:
 	void CCALL WriteXattr(PfmMarshallerWriteXattrOp* op, void* formatterUse);
 
 private:
+	UInt32 RootArchiveID = ~(UInt32)0;
+	LPCWSTR DllName = L"7z.dll";
+
+	HRESULT _ret = 0;
+	std::wstring _fileName;
+	UInt32 _fileCount = 0;
+	std::map<int64_t, UInt32> _openIDArchiveIDMap;
+	CMyComPtr<IInArchive> _archive;
+	CMyComPtr<IInStream> _inStream;
+	HMODULE _dll = nullptr;
+
+
 	PfmAttribs GetFileAttribute(UInt32 id);
-	UInt32 GetArchiveID(int64_t oid);
+	UInt32 GetArchiveID(int64_t oid) { return _openIDArchiveIDMap[oid]; }
 	UInt32 GetArchiveID(PfmNamePart *parts, size_t count);
 	int64_t GetOpenID(UInt32 id);
 	inline void SaveID(int64_t oid, UInt32 id) { _openIDArchiveIDMap[oid] = id; }
 	inline bool IsOpened(int64_t oid) { return _openIDArchiveIDMap.find(oid) != _openIDArchiveIDMap.end(); }
 	size_t List(UInt32 id, PfmMarshallerListOp* op);
+
+	std::wstring &GetPathPro(UInt32 id);
+	void ArchiveVolume::CleanVAR(PROPVARIANT *prop);
 };
