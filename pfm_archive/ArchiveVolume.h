@@ -1,5 +1,5 @@
 #pragma once
-#include "7zheaders.h"
+#include "ArchiveWrap.h"
 #include "pfmHeader.h"
 
 #include <map>
@@ -10,9 +10,8 @@ class ArchiveVolume : public PfmFormatterDispatch
 {
 public:
 	ArchiveVolume(LPCWSTR filePath);
-	~ArchiveVolume(void);
 
-	bool Aviliable() { return !_archive && _ret == 0; }
+	bool Aviliable() { return _aviliable; }
 
 	// PfmFormatterDispatch
 	void CCALL Open(PfmMarshallerOpenOp* op, void* formatterUse);
@@ -36,17 +35,13 @@ public:
 	void CCALL WriteXattr(PfmMarshallerWriteXattrOp* op, void* formatterUse);
 
 private:
-	UInt32 RootArchiveID = min(~(UInt32)0, ~(int64_t)0);
-	LPCWSTR DllName = L"7z.dll";
 
 	HRESULT _ret = 0;
 	std::wstring _fileName;
-	UInt32 _fileCount = 0;
 	size_t _size = 0;
 	std::map<int64_t, UInt32> _openIDArchiveIDMap;
-	CMyComPtr<IInArchive> _archive;
-	CMyComPtr<IInStream> _inStream;
-	HMODULE _dll = nullptr;
+	ArchiveWrap _archive;
+	bool _aviliable = false;
 
 
 	PfmAttribs GetFileAttribute(UInt32 id);
@@ -61,5 +56,4 @@ private:
 	std::wstring GetPathPro(UInt32 id);
 	std::wstring GetEndName(UInt32 id);
 	std::wstring GetEndName(std::wstring path);
-	void ArchiveVolume::CleanVAR(PROPVARIANT *prop);
 };
