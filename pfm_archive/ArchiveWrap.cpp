@@ -230,11 +230,11 @@ size_t ArchiveWrap::Read(UInt32 id, byte * data, size_t offset, size_t size)
 	{
 		auto fun = [id, this](MyCacheStream *s) {
 			CMyComPtr<IArchiveExtractCallback> callback = new CArchiveExtractCallback(s);
-			_archive->Extract(&id, 1, FALSE, callback);
+			return _archive->Extract(&id, 1, FALSE, callback);
 		};
 		_streamManager.AddStream(hash, v.lVal, fun);
 	}
-	return size_t();
+	return _streamManager.Read(hash, data, offset, size);
 }
 
 void ArchiveWrap::CreateFilesAndFolders()
