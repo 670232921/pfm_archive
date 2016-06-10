@@ -107,7 +107,7 @@ public:
 	STDMETHODIMP CArchiveExtractCallback::GetStream(UInt32 index,
 		ISequentialOutStream **outStream, Int32 askExtractMode)
 	{
-		return _stream.QueryInterface(IID_ISequentialOutStream, outStream);
+		return askExtractMode == NArchive::NExtract::NAskMode::kExtract ? _stream.QueryInterface(IID_ISequentialOutStream, outStream) : S_OK;
 	}
 
 	STDMETHODIMP CArchiveExtractCallback::PrepareOperation(Int32 askExtractMode)
@@ -224,7 +224,7 @@ size_t ArchiveWrap::Read(UInt32 id, byte * data, size_t offset, size_t size)
 {
 	ULONGLONG hash = GetHash(_filePath.c_str(), id);
 	NWindows::NCOM::CPropVariant v;
-	HRESULT hr = GetProperty(id, kpidPhySize, &v);
+	HRESULT hr = GetProperty(id, kpidSize, &v);
 	if (!SUCCEEDED(hr) || v.vt != VT_UI8) return 0;
 	if (!_streamManager.IsAdded(hash))
 	{

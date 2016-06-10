@@ -17,6 +17,7 @@ STDMETHODIMP MyCacheStream::Write(const void * data, UInt32 size, UInt32 * proce
 
 		*processedSize = size + _bufferPos > _size ? _size - _bufferPos : size;
 		memcpy(_buffer + _bufferPos, data, *processedSize);
+		_bufferPos += *processedSize;
 		return S_OK;
 		// todo lock
 	}
