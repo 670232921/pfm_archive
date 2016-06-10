@@ -9,7 +9,7 @@ int wmain(int argc, const wchar_t*const* argv)
 	FD_T fromFormatterWrite = FD_INVALID;
 	PfmMountCreateParams mcp;
 	PfmMarshallerServeParams msp;
-	PfmFormatterDispatch* volume = GetPfmFormatterDispatch(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
+	PfmFormatterDispatch* volume = GetPfmFormatterDispatch(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.zip");
 	PfmMarshaller* marshaller = 0;
 
 	mcp.toFormatterWrite = FD_INVALID;

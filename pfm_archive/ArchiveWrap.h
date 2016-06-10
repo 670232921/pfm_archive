@@ -8,7 +8,6 @@ class ArchiveWrap
 {
 public:
 	static const UInt32 RootArchiveID = min(~(UInt32)0, ~(int64_t)0);
-	static void CleanVAR(PROPVARIANT *prop);
 	static const std::wstring RootName;
 
 	ArchiveWrap() {}

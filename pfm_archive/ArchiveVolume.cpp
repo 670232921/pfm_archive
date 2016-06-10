@@ -311,21 +311,20 @@ PfmAttribs ArchiveVolume::GetFileAttribute(UInt32 id)
 	/*static int8_t const pfmFileTypeFile = 1;
 	static int8_t const pfmFileTypeFolder = 2;*/
 	PfmAttribs att = zeroAttribs;
-	PROPVARIANT v;
+	NWindows::NCOM::CPropVariant v;
 
 	_ret = _archive.GetProperty(id, kpidIsDir, &v);
 	CHECKHRESULT(_ret);
 	if (v.vt == VT_BOOL)
 		att.fileType = v.boolVal ? pfmFileTypeFolder : pfmFileTypeFile;
-	ArchiveWrap::CleanVAR(&v);
 
 	att.fileId = id;
 
+	v.Clear();
 	_ret = _archive.GetProperty(id, kpidSize, &v);
 	CHECKHRESULT(_ret);
 	if (v.vt == VT_UI8)
 		att.fileSize = v.lVal;
-	ArchiveWrap::CleanVAR(&v);
 	return att;
 }
 

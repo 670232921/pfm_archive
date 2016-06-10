@@ -134,6 +134,7 @@
     <ClInclude Include="..\7z\CPP\7zip\IProgress.h" />
     <ClInclude Include="..\7z\CPP\7zip\IStream.h" />
     <ClInclude Include="..\7z\CPP\7zip\PropID.h" />
+    <ClInclude Include="..\7z\CPP\Windows\PropVariant.h" />
     <ClInclude Include="..\include\pfmapi.h" />
     <ClInclude Include="..\include\pfmapi.hxx" />
     <ClInclude Include="..\include\pfmformatter.h" />
@@ -146,6 +147,7 @@
     <ClInclude Include="pfmHeader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\7z\CPP\Windows\PropVariant.cpp" />
     <ClCompile Include="ArchiveVolume.cpp" />
     <ClCompile Include="ArchiveWrap.cpp" />
     <ClCompile Include="Source.cpp" />

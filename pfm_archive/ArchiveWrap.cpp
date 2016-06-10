@@ -159,7 +159,7 @@ STDMETHODIMP ArchiveWrap::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *
 	}
 	else if (index < _fileCount + _folders.size())
 	{
-		CleanVAR(value);
+		NWindows::NCOM::PropVariant_Clear(value);
 		if (propID == kpidPath)
 		{
 			value->vt = VT_BSTR;
@@ -187,47 +187,13 @@ STDMETHODIMP ArchiveWrap::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *
 	return S_OK;
 }
 
-void ArchiveWrap::CleanVAR(PROPVARIANT *prop)
-{
-	switch (prop->vt)
-	{
-	case VT_EMPTY:
-	case VT_UI1:
-	case VT_I1:
-	case VT_I2:
-	case VT_UI2:
-	case VT_BOOL:
-	case VT_I4:
-	case VT_UI4:
-	case VT_R4:
-	case VT_INT:
-	case VT_UINT:
-	case VT_ERROR:
-	case VT_FILETIME:
-	case VT_UI8:
-	case VT_R8:
-	case VT_CY:
-	case VT_DATE:
-		prop->vt = VT_EMPTY;
-		prop->wReserved1 = 0;
-		prop->wReserved2 = 0;
-		prop->wReserved3 = 0;
-		prop->uhVal.QuadPart = 0;
-		return;
-	}
-	::VariantClear((VARIANTARG *)prop);
-	// return ::PropVariantClear(prop);
-	// PropVariantClear can clear VT_BLOB.
-}
-
 wstring ArchiveWrap::GetPathFromArchive(UInt32 id)
 {
-	PROPVARIANT v;
+	NWindows::NCOM::CPropVariant v;
 	wstring ret;
 	HRESULT _ret = _archive->GetProperty(id, kpidPath, &v);
 	CHECKHRESULT(_ret);
 	if (v.vt == VT_BSTR)
 		ret = v.bstrVal;
-	ArchiveWrap::CleanVAR(&v);
 	return ret;
 }
