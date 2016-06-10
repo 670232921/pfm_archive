@@ -145,12 +145,14 @@
     <ClInclude Include="ArchiveVolume.h" />
     <ClInclude Include="ArchiveWrap.h" />
     <ClInclude Include="pfmHeader.h" />
+    <ClInclude Include="StreamManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\7z\CPP\Windows\PropVariant.cpp" />
     <ClCompile Include="ArchiveVolume.cpp" />
     <ClCompile Include="ArchiveWrap.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="StreamManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

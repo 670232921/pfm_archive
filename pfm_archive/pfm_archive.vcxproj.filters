@@ -88,6 +88,9 @@
     <ClInclude Include="..\7z\CPP\Windows\PropVariant.h">
       <Filter>7z</Filter>
     </ClInclude>
+    <ClInclude Include="StreamManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
@@ -101,6 +104,9 @@
     </ClCompile>
     <ClCompile Include="..\7z\CPP\Windows\PropVariant.cpp">
       <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamManager.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -14,6 +14,7 @@ DEFINE_GUID(CLSID_CFormat7z,
 	0x23170F69, 0x40C1, 0x278A, 0x10, 0x00, 0x00, 0x01, 0x10, 0x07, 0x00, 0x00);
 #define CLSID_Format CLSID_CFormat7z
 
+#pragma region IMP
 class InStream : public IInStream, public CMyUnknownImp
 {
 	ifstream _ifs;
@@ -44,10 +45,10 @@ public:
 	}
 
 	MY_QUERYINTERFACE_BEGIN2(IInStream)
-		MY_QUERYINTERFACE_END
-		MY_ADDREF_RELEASE
+	MY_QUERYINTERFACE_END
+	MY_ADDREF_RELEASE
 };
-
+///////////////////////////////////////////////////////////////////////
 class CArchiveOpenCallback :
 	public IArchiveOpenCallback,
 	public ICryptoGetTextPassword,
@@ -74,8 +75,102 @@ public:
 		return E_ABORT;
 	}
 };
+/////////////////////////////////////////////////////////////////////
+class CArchiveExtractCallback :
+	public IArchiveExtractCallback,
+	public ICryptoGetTextPassword,
+	public CMyUnknownImp
+{
+public:
+	MY_UNKNOWN_IMP1(ICryptoGetTextPassword)
+
+private:
+	CMyComPtr<MyCacheStream> _stream;
+	bool _extractMode;
+
+public:
+
+	UInt64 NumErrors;
+
+	CArchiveExtractCallback(MyCacheStream * stream) : _stream(stream), NumErrors(0) {	}
+
+	STDMETHODIMP CArchiveExtractCallback::SetTotal(UInt64 /* size */)
+	{
+		return S_OK;
+	}
+
+	STDMETHODIMP CArchiveExtractCallback::SetCompleted(const UInt64 * /* completeValue */)
+	{
+		return S_OK;
+	}
+
+	STDMETHODIMP CArchiveExtractCallback::GetStream(UInt32 index,
+		ISequentialOutStream **outStream, Int32 askExtractMode)
+	{
+		return _stream.QueryInterface(IID_ISequentialOutStream, outStream);
+	}
+
+	STDMETHODIMP CArchiveExtractCallback::PrepareOperation(Int32 askExtractMode)
+	{
+		return S_OK;
+	}
+
+	STDMETHODIMP CArchiveExtractCallback::SetOperationResult(Int32 operationResult)
+	{
+		switch (operationResult)
+		{
+		case NArchive::NExtract::NOperationResult::kOK:
+			break;
+		default:
+		{
+			NumErrors++;
+			/*switch (operationResult)
+			{
+			case NArchive::NExtract::NOperationResult::kUnsupportedMethod:
+				break;
+			case NArchive::NExtract::NOperationResult::kCRCError:
+				break;
+			case NArchive::NExtract::NOperationResult::kDataError:
+				break;
+			case NArchive::NExtract::NOperationResult::kUnavailable:
+				break;
+			case NArchive::NExtract::NOperationResult::kUnexpectedEnd:
+				break;
+			case NArchive::NExtract::NOperationResult::kDataAfterEnd:
+				break;
+			case NArchive::NExtract::NOperationResult::kIsNotArc:
+				break;
+			case NArchive::NExtract::NOperationResult::kHeadersError:
+				break;
+			}*/
+		}
+		}
+
+		_stream->CloseFile();
+		return S_OK;
+	}
+
+
+	STDMETHODIMP CArchiveExtractCallback::CryptoGetTextPassword(BSTR *password)
+	{
+		return E_ABORT; // todo
+	}
+};
+#pragma endregion IMP
 
 wstring const ArchiveWrap::RootName(L"Root");
+
+ULONGLONG ArchiveWrap::GetHash(LPCWSTR s, UInt32 id)
+{
+#define GetHashA 54059 /* a prime */
+#define GetHashB 76963 /* another prime */
+	ULONGLONG h = id;
+	while (*s) {
+		h = (h * GetHashA) ^ (s[0] * GetHashB);
+		s++;
+	}
+	return h;
+}
 
 ArchiveWrap::~ArchiveWrap()
 {
@@ -85,6 +180,8 @@ ArchiveWrap::~ArchiveWrap()
 
 bool ArchiveWrap::Init(LPCWSTR filePath)
 {
+	_filePath = filePath;
+
 	_dll = ::LoadLibrary(DllName);
 	CHECKNULL(_dll);
 
@@ -121,6 +218,23 @@ const wstring & ArchiveWrap::GetPathProp(UInt32 index)
 	{
 		return RootName;
 	}
+}
+
+size_t ArchiveWrap::Read(UInt32 id, byte * data, size_t offset, size_t size)
+{
+	ULONGLONG hash = GetHash(_filePath.c_str(), id);
+	NWindows::NCOM::CPropVariant v;
+	HRESULT hr = GetProperty(id, kpidPhySize, &v);
+	if (!SUCCEEDED(hr) || v.vt != VT_UI8) return 0;
+	if (!_streamManager.IsAdded(hash))
+	{
+		auto fun = [id, this](MyCacheStream *s) {
+			CMyComPtr<IArchiveExtractCallback> callback = new CArchiveExtractCallback(s);
+			_archive->Extract(&id, 1, FALSE, callback);
+		};
+		_streamManager.AddStream(hash, v.lVal, fun);
+	}
+	return size_t();
 }
 
 void ArchiveWrap::CreateFilesAndFolders()

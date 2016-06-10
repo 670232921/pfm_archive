@@ -200,7 +200,7 @@ void CCALL ArchiveVolume::Read(PfmMarshallerReadOp* op, void* formatterUse)
 	}
 	else
 	{
-		// todo read
+		actualSize = _archive.Read(GetArchiveID(openId), (byte*)data, fileOffset, requestedSize);
 	}
 
 	op->Complete(perr, actualSize);
