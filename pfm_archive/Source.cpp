@@ -1,7 +1,10 @@
 #include "pfmHeader.h"
 
-int wmain(int argc, const wchar_t*const* argv)
+int wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+//int wmain(int argc, const wchar_t*const* argv)
 {
+	if (pCmdLine == 0 || pCmdLine[0] == 0) return 0;
+
 	int err = 0;
 	PfmApi* pfm = 0;
 	PfmMount* mount = 0;
@@ -9,7 +12,8 @@ int wmain(int argc, const wchar_t*const* argv)
 	FD_T fromFormatterWrite = FD_INVALID;
 	PfmMountCreateParams mcp;
 	PfmMarshallerServeParams msp;
-	PfmFormatterDispatch* volume = GetPfmFormatterDispatch(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\3.zip");
+	//PfmFormatterDispatch* volume = GetPfmFormatterDispatch(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\3.zip");
+	PfmFormatterDispatch* volume = GetPfmFormatterDispatch(pCmdLine);
 	PfmMarshaller* marshaller = 0;
 
 	mcp.toFormatterWrite = FD_INVALID;
@@ -19,19 +23,29 @@ int wmain(int argc, const wchar_t*const* argv)
 	msp.toFormatterRead = FD_INVALID;
 	msp.fromFormatterWrite = FD_INVALID;
 
-	if (argc <= 1)
+	wchar_t name[1024] = { 0 };
+	for (int i = lstrlenW(pCmdLine) - 1;; i--)
 	{
-		/*printf(
-			"Sample file system application.\n"
-			"syntax: hellofs <mount name>\n");
-		err = -1;*/
-		mcp.driveLetter = L'F';
-		mcp.mountSourceName = L"test";
+		if (pCmdLine[i] == L'\\')
+		{
+			//lstrcpyW(name, argv[1][i + 1])
+			mcp.mountSourceName = pCmdLine + i + 1;
+			break;
+		}
 	}
-	else
+	DWORD drivers = GetLogicalDrives();
+	if (drivers != 0)
 	{
-		mcp.mountSourceName = argv[1];
+		for (int i = 8; i < 26; i++)
+		{
+			if (!(drivers & 1 << i))
+			{
+				mcp.driveLetter = L'A' + i;
+				break;
+			}
+		}
 	}
+
 	if (!err)
 	{
 		err = PfmApiFactory(&pfm);

@@ -2,4 +2,4 @@
 #include "../samples/common/portability.c"
 #include "../include/pfmapi.h"
 
-extern PfmFormatterDispatch* GetPfmFormatterDispatch(wchar_t *);
+extern PfmFormatterDispatch* GetPfmFormatterDispatch(const wchar_t *);

@@ -1,6 +1,7 @@
 #include "ArchiveWrap.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 using namespace std;
 
@@ -32,15 +33,38 @@ public:
 
 	STDMETHODIMP Seek(Int64 offset, UInt32 seekOrigin, UInt64 *newPosition)
 	{
+#ifdef nn
+		auto cur = _ifs.tellg();
+		_ifs.seekg(offset, seekOrigin == SZ_SEEK_SET ? _ifs.beg : (seekOrigin == SZ_SEEK_CUR ? _ifs.cur : _ifs.end));
+		auto np = _ifs.tellg();
+		if (newPosition) *newPosition = np;
+		wstringstream ss;
+		ss << L"pfm-seek--current: " << cur << L"   offset: " << offset << L"    seekorigin: " << seekOrigin << L"    newpos: " << np << endl;
+		OutputDebugStringW(ss.str().c_str());
+#else
 		_ifs.seekg(offset, seekOrigin == SZ_SEEK_SET ? _ifs.beg : (seekOrigin == SZ_SEEK_CUR ? _ifs.cur : _ifs.end));
 		if (newPosition) *newPosition = _ifs.tellg();
+#endif
+		_ifs.clear();
 		return S_OK;
 	}
 
 	STDMETHODIMP Read(void *data, UInt32 size, UInt32 *processedSize)
 	{
+#ifdef nn
+		auto cur = _ifs.tellg();
+		_ifs.read((char*)data, size);
+		auto ps = _ifs.gcount();
+		auto np = _ifs.tellg();
+		if (processedSize) *processedSize = ps;
+		wstringstream ss;
+		ss << L"pfm-read--current: " << cur << L"    newcurrent: " << np << L"    needsize: " << size << L"    readedsize: " << ps << endl;
+		OutputDebugStringW(ss.str().c_str());
+#else
 		_ifs.read((char*)data, size);
 		if (processedSize) *processedSize = _ifs.gcount();
+#endif
+		_ifs.clear();
 		return S_OK;
 	}
 

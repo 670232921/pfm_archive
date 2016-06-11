@@ -13,7 +13,7 @@ static PfmOpenAttribs zeroOpenAttribs = {};
 static PfmAttribs zeroAttribs = {};
 static PfmMediaInfo zeroMediaInfo = {};
 
-PfmFormatterDispatch* GetPfmFormatterDispatch(wchar_t * name)
+PfmFormatterDispatch* GetPfmFormatterDispatch(const wchar_t * name)
 {
 	return new ArchiveVolume(name);
 }
