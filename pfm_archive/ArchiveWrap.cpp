@@ -184,8 +184,10 @@ public:
 
 namespace
 {
-	GUID FindGUID(HMODULE h, wstring s)
+	vector<GUID> FindGUID(HMODULE h, wstring s)
 	{
+		vector<GUID> ret;
+
 		size_t p = s.find_last_of(L".");
 		if (p != s.npos) s = s.substr(p + 1);
 
@@ -213,7 +215,8 @@ namespace
 					{
 						NWindows::NCOM::CPropVariant g;
 						if (S_OK != gf(i, NArchive::NHandlerPropID::kClassID, &g)) throw;
-						return *(GUID *)g.bstrVal;
+						ret.push_back(*(GUID *)g.bstrVal);
+						break;
 					}
 					t = t.substr(p + 1);
 				}
@@ -222,11 +225,11 @@ namespace
 				{
 					NWindows::NCOM::CPropVariant g;
 					if (S_OK != gf(i, NArchive::NHandlerPropID::kClassID, &g)) throw;
-					return *(GUID *)g.bstrVal;
+					ret.push_back(*(GUID *)g.bstrVal);
 				}
 			}
 		}
-		throw;
+		return ret;
 	}
 }
 
@@ -260,21 +263,28 @@ bool ArchiveWrap::Init(LPCWSTR filePath)
 	Func_CreateObject pco = reinterpret_cast<Func_CreateObject>(::GetProcAddress(_dll, "CreateObject"));
 	CHECKNULL(pco);
 
-	GUID guid = FindGUID(_dll, _filePath);
-	pco(&guid, &IID_IInArchive, reinterpret_cast<void **>(&_archive));
-	CHECKNULL(_archive);
-
-	const UInt64 scanSize = 0;
 	_inStream = new InStream(filePath);
 	CMyComPtr<IArchiveOpenCallback> callback = new CArchiveOpenCallback();
-	HRESULT ret = _archive->Open(_inStream, &scanSize, callback);
-	CHECKHRESULT(ret);
 
-	ret = _archive->GetNumberOfItems(&_fileCount);
-	CHECKHRESULT(ret);
+	auto guids = FindGUID(_dll, _filePath);
+	for each (auto guid in guids)
+	{
 
-	CreateFilesAndFolders();
-	return true;
+		pco(&guid, &IID_IInArchive, reinterpret_cast<void **>(&_archive));
+		if (_archive == nullptr) continue;
+
+		const UInt64 scanSize = 0;
+		//const UInt64 scanSize = 1 << 23;
+		HRESULT ret = _archive->Open(_inStream, &scanSize, callback);
+		if (ret != S_OK) continue;
+
+		ret = _archive->GetNumberOfItems(&_fileCount);
+		if (ret != S_OK) continue;
+
+		CreateFilesAndFolders();
+		return true;
+	}
+	return false;
 }
 
 const wstring & ArchiveWrap::GetPathProp(UInt32 index)

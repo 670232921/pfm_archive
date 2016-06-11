@@ -2,6 +2,8 @@ PROG = 7z.dll
 DEF_FILE = ../../Archive/Archive2.def
 CFLAGS = $(CFLAGS) \
   -DEXTERNAL_CODECS \
+  
+MY_STATIC_LINK = 1
 
 !IFNDEF UNDER_CE
 CFLAGS = $(CFLAGS) -D_7ZIP_LARGE_PAGES

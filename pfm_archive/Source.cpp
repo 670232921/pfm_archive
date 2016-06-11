@@ -1,9 +1,18 @@
 #include "pfmHeader.h"
 
-int wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 //int wmain(int argc, const wchar_t*const* argv)
 {
 	if (pCmdLine == 0 || pCmdLine[0] == 0) return 0;
+
+	wchar_t path[MAX_PATH + 1] = { 0 };
+	int s = 0, e = lstrlenW(pCmdLine);
+	if (pCmdLine[s] == L'\"' && pCmdLine[e - 1] == L'\"')
+	{
+		s++;
+		e--;
+	}
+	memcpy(path, pCmdLine + s, e * sizeof(wchar_t));
 
 	int err = 0;
 	PfmApi* pfm = 0;
@@ -13,7 +22,7 @@ int wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int n
 	PfmMountCreateParams mcp;
 	PfmMarshallerServeParams msp;
 	//PfmFormatterDispatch* volume = GetPfmFormatterDispatch(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\3.zip");
-	PfmFormatterDispatch* volume = GetPfmFormatterDispatch(pCmdLine);
+	PfmFormatterDispatch* volume = GetPfmFormatterDispatch(path);
 	PfmMarshaller* marshaller = 0;
 
 	mcp.toFormatterWrite = FD_INVALID;
@@ -24,12 +33,12 @@ int wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int n
 	msp.fromFormatterWrite = FD_INVALID;
 
 	wchar_t name[1024] = { 0 };
-	for (int i = lstrlenW(pCmdLine) - 1;; i--)
+	for (int i = lstrlenW(path) - 1;; i--)
 	{
-		if (pCmdLine[i] == L'\\')
+		if (path[i] == L'\\')
 		{
 			//lstrcpyW(name, argv[1][i + 1])
-			mcp.mountSourceName = pCmdLine + i + 1;
+			mcp.mountSourceName = path + i + 1;
 			break;
 		}
 	}

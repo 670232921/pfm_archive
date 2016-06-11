@@ -30,7 +30,7 @@ LFLAGS = $(LFLAGS) /ENTRY:mainACRTStartup
 !ENDIF
 !ELSE
 !IFNDEF NEW_COMPILER
-LFLAGS = $(LFLAGS) -OPT:NOWIN98
+LFLAGS = $(LFLAGS)
 !ENDIF
 CFLAGS = $(CFLAGS) -Gr
 LIBS = $(LIBS) user32.lib advapi32.lib shell32.lib
@@ -42,7 +42,7 @@ COMPL_ASM = $(MY_ML) $** $O/$(*B).obj
 COMPL_ASM = $(MY_ML) -c -Fo$O/ $**
 !ENDIF
 
-CFLAGS = $(CFLAGS) -nologo -c -Fo$O/ -W4 -WX -EHsc -Gy -GR- -GF
+CFLAGS = $(CFLAGS) -nologo -c -Fo$O/ -W4 -EHsc -Gy -GR- -GF
 
 !IFDEF MY_STATIC_LINK
 !IFNDEF MY_SINGLE_THREAD
