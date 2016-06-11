@@ -158,6 +158,54 @@ public:
 };
 #pragma endregion IMP
 
+namespace
+{
+	GUID FindGUID(HMODULE h, wstring s)
+	{
+		size_t p = s.find_last_of(L".");
+		if (p != s.npos) s = s.substr(p + 1);
+
+		Func_GetNumberOfFormats gn = (Func_GetNumberOfFormats)::GetProcAddress(h, "GetNumberOfFormats");
+		if (gn == nullptr) throw;
+
+		Func_GetHandlerProperty2 gf = (Func_GetHandlerProperty2)::GetProcAddress(h, "GetHandlerProperty2");
+		if (gf == nullptr) throw;
+
+		UInt32 n = 0;
+		if (gn(&n) != S_OK) throw;
+
+		for (int i = n - 1; i >= 0; i--)
+		{
+			NWindows::NCOM::CPropVariant e;
+			if (S_OK != gf(i, NArchive::NHandlerPropID::kExtension, &e)) throw;
+
+			if (e.vt == VT_BSTR)
+			{
+				p = 0;
+				wstring t(e.bstrVal);
+				while ((p = t.find(L' ')) != t.npos)
+				{
+					if (s == t.substr(0, p))
+					{
+						NWindows::NCOM::CPropVariant g;
+						if (S_OK != gf(i, NArchive::NHandlerPropID::kClassID, &g)) throw;
+						return *(GUID *)g.bstrVal;
+					}
+					t = t.substr(p + 1);
+				}
+
+				if (s == t)
+				{
+					NWindows::NCOM::CPropVariant g;
+					if (S_OK != gf(i, NArchive::NHandlerPropID::kClassID, &g)) throw;
+					return *(GUID *)g.bstrVal;
+				}
+			}
+		}
+		throw;
+	}
+}
+
 wstring const ArchiveWrap::RootName(L"Root");
 
 ULONGLONG ArchiveWrap::GetHash(LPCWSTR s, UInt32 id)
@@ -188,10 +236,11 @@ bool ArchiveWrap::Init(LPCWSTR filePath)
 	Func_CreateObject pco = reinterpret_cast<Func_CreateObject>(::GetProcAddress(_dll, "CreateObject"));
 	CHECKNULL(pco);
 
-	pco(&CLSID_Format, &IID_IInArchive, reinterpret_cast<void **>(&_archive));
+	GUID guid = FindGUID(_dll, _filePath);
+	pco(&guid, &IID_IInArchive, reinterpret_cast<void **>(&_archive));
 	CHECKNULL(_archive);
 
-	const UInt64 scanSize = 1 << 23;
+	const UInt64 scanSize = 0;
 	_inStream = new InStream(filePath);
 	CMyComPtr<IArchiveOpenCallback> callback = new CArchiveOpenCallback();
 	HRESULT ret = _archive->Open(_inStream, &scanSize, callback);

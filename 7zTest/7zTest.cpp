@@ -10,7 +10,7 @@
 
 #include "../../../7z1600-src//CPP//7zip/IPassword.h"
 #include "../../../7z1600-src//CPP//7zip/Common/FileStreams.h"
-
+#include "../../../7z1600-src/CPP/Windows/PropVariant.h"
 #include "../../../7z1600-src/CPP/Windows/PropVariantConv.h"
 
 #include <iostream>
@@ -152,53 +152,81 @@ STDMETHODIMP CArchiveOpenCallback::CryptoGetTextPassword(BSTR *password)
 	return StringToBstr(Password, password);
 }
 
+void PrintV(PROPVARIANT *v)
+{
+	if (v->vt == 0) return;
+
+	wprintf(L"%s\n", v->bstrVal);
+}
+
 int main()
 {
 	HMODULE mo = ::LoadLibraryW(L"7z.dll");
 	CHECKNULL(mo);
 
-	Func_CreateObject pco = (Func_CreateObject)::GetProcAddress(mo, "CreateObject");
-	CHECKNULL(pco);
+	Func_GetNumberOfFormats gn = (Func_GetNumberOfFormats)::GetProcAddress(mo, "GetNumberOfFormats");
+	CHECKNULL(gn);
 
-	CMyComPtr<IInArchive> iina;
-	CHECKHRESULT(pco(&CLSID_Format, &IID_IInArchive, (void **)&iina));
+	Func_GetHandlerProperty2 gf = (Func_GetHandlerProperty2)::GetProcAddress(mo, "GetHandlerProperty2");
+	CHECKNULL(gf);
 
-	//InStream is(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
-	//CInFileStream * fileStream = new CInFileStream();
-	InStream * fileStream = new InStream("C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
-	CMyComPtr<IInStream> is = fileStream;
-	//fileStream->Open(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
-    CArchiveOpenCallback* opencallback = new CArchiveOpenCallback();
-	CMyComPtr<IArchiveOpenCallback> op = opencallback;
-	const UInt64 scanSize = 1 << 23;
-	CHECKHRESULT(iina->Open(is, &scanSize, op));
+	UInt32 num = 0;
+	CHECKHRESULT(gn(&num));
 
-	UInt32 npro = 0, nitem = 0;
-	CHECKHRESULT(iina->GetNumberOfProperties(&npro));
-	CHECKHRESULT(iina->GetNumberOfItems(&nitem));
-	for (int i = 0; i < npro; i++)
+	for (int i = 0; i < num; i++)
 	{
-		BSTR bstr;
-		PROPID pid;
-		VARTYPE vt;
-		CHECKHRESULT(iina->GetPropertyInfo(i, &bstr, &pid, &vt));
-		cout << bstr << "  " << pid << "  " << vt << "\n";
+		cout << "==========================\n";
+		NWindows::NCOM::CPropVariant v, vv, vvv;
+		CHECKHRESULT(gf(i, NArchive::NHandlerPropID::kAddExtension, &v));
+		PrintV(&v);
+		CHECKHRESULT(gf(i, NArchive::NHandlerPropID::kClassID, &vv));
+		//PrintV(&vv);
+		CHECKHRESULT(gf(i, NArchive::NHandlerPropID::kExtension, &vvv));
+		PrintV(&vvv);
 	}
-	for (int i = 0; i < nitem; i++)
-	{
-		for (int j = 0; j < npro; j++)
-		{
-			BSTR bstr;
-			PROPID pid;
-			VARTYPE vt;
-			CHECKHRESULT(iina->GetPropertyInfo(j, &bstr, &pid, &vt));
-			PROPVARIANT var;
-			CHECKHRESULT(iina->GetProperty(i, pid, &var));
-			if (vt == VT_BSTR  && var.vt != 0)
-			wcout << ( var.bstrVal ) << L"\n";
-		}
-		cout << "=====================================\n";
-	}
+
+	//Func_CreateObject pco = (Func_CreateObject)::GetProcAddress(mo, "CreateObject");
+	//CHECKNULL(pco);
+
+	//CMyComPtr<IInArchive> iina;
+	//CHECKHRESULT(pco(&CLSID_Format, &IID_IInArchive, (void **)&iina));
+
+	////InStream is(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
+	////CInFileStream * fileStream = new CInFileStream();
+	//InStream * fileStream = new InStream("C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
+	//CMyComPtr<IInStream> is = fileStream;
+	////fileStream->Open(L"C:\\Users\\ccc\\Documents\\Visual Studio 2015\\Projects\\pfm\\pfm_archive\\Debug\\test.7z");
+ //   CArchiveOpenCallback* opencallback = new CArchiveOpenCallback();
+	//CMyComPtr<IArchiveOpenCallback> op = opencallback;
+	//const UInt64 scanSize = 1 << 23;
+	//CHECKHRESULT(iina->Open(is, &scanSize, op));
+
+	//UInt32 npro = 0, nitem = 0;
+	//CHECKHRESULT(iina->GetNumberOfProperties(&npro));
+	//CHECKHRESULT(iina->GetNumberOfItems(&nitem));
+	//for (int i = 0; i < npro; i++)
+	//{
+	//	BSTR bstr;
+	//	PROPID pid;
+	//	VARTYPE vt;
+	//	CHECKHRESULT(iina->GetPropertyInfo(i, &bstr, &pid, &vt));
+	//	cout << bstr << "  " << pid << "  " << vt << "\n";
+	//}
+	//for (int i = 0; i < nitem; i++)
+	//{
+	//	for (int j = 0; j < npro; j++)
+	//	{
+	//		BSTR bstr;
+	//		PROPID pid;
+	//		VARTYPE vt;
+	//		CHECKHRESULT(iina->GetPropertyInfo(j, &bstr, &pid, &vt));
+	//		PROPVARIANT var;
+	//		CHECKHRESULT(iina->GetProperty(i, pid, &var));
+	//		if (vt == VT_BSTR  && var.vt != 0)
+	//		wcout << ( var.bstrVal ) << L"\n";
+	//	}
+	//	cout << "=====================================\n";
+	//}
 	cout << "end"; getchar();
     return 0;
 }
