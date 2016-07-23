@@ -1,5 +1,16 @@
 #include "pfmHeader.h"
 
+PfmMarshaller* g_PfmMarshaller = nullptr;
+const wchar_t * GetPassword()
+{
+	static const wchar_t* buf = nullptr;
+	if (buf == nullptr)
+	{
+		g_PfmMarshaller->GetPassword(0, L"«Î ‰»Î√‹¬Î", &buf);
+	}
+	return buf;
+}
+
 int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 //int wmain(int argc, const wchar_t*const* argv)
 {
@@ -10,7 +21,7 @@ int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdL
 	if (pCmdLine[s] == L'\"' && pCmdLine[e - 1] == L'\"')
 	{
 		s++;
-		e--;
+		e-= 2;
 	}
 	memcpy(path, pCmdLine + s, e * sizeof(wchar_t));
 
@@ -71,6 +82,7 @@ int __stdcall wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdL
 		{
 			printf("ERROR: %i Unable to create marshaller.\n", err);
 		}
+		g_PfmMarshaller = marshaller;
 	}
 	if (!err)
 	{

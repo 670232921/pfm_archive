@@ -16,6 +16,7 @@ DEFINE_GUID(CLSID_CFormat7z,
 #define CLSID_Format CLSID_CFormat7z
 
 #pragma region IMP
+extern const wchar_t * GetPassword();
 class InStream : public IInStream, public CMyUnknownImp
 {
 	ifstream _ifs;
@@ -96,7 +97,8 @@ public:
 
 	STDMETHODIMP CryptoGetTextPassword(BSTR *password)
 	{
-		return E_ABORT;
+		*password = ::SysAllocString(GetPassword());
+		return password == nullptr ? E_ABORT : S_OK;
 	}
 };
 /////////////////////////////////////////////////////////////////////
@@ -177,7 +179,8 @@ public:
 
 	STDMETHODIMP CArchiveExtractCallback::CryptoGetTextPassword(BSTR *password)
 	{
-		return E_ABORT; // todo
+		*password = ::SysAllocString(GetPassword());
+		return password == nullptr ? E_ABORT : S_OK;
 	}
 };
 #pragma endregion IMP
@@ -202,8 +205,9 @@ namespace
 
 		for (int i = n - 1; i >= 0; i--)
 		{
-			NWindows::NCOM::CPropVariant e;
+			NWindows::NCOM::CPropVariant e, g;
 			if (S_OK != gf(i, NArchive::NHandlerPropID::kExtension, &e)) throw;
+			if (S_OK != gf(i, NArchive::NHandlerPropID::kClassID, &g)) throw;
 
 			if (e.vt == VT_BSTR)
 			{
@@ -213,9 +217,7 @@ namespace
 				{
 					if (s == t.substr(0, p))
 					{
-						NWindows::NCOM::CPropVariant g;
-						if (S_OK != gf(i, NArchive::NHandlerPropID::kClassID, &g)) throw;
-						ret.push_back(*(GUID *)g.bstrVal);
+						ret.insert(ret.begin(), *(GUID *)g.bstrVal);
 						break;
 					}
 					t = t.substr(p + 1);
@@ -223,11 +225,12 @@ namespace
 
 				if (s == t)
 				{
-					NWindows::NCOM::CPropVariant g;
-					if (S_OK != gf(i, NArchive::NHandlerPropID::kClassID, &g)) throw;
-					ret.push_back(*(GUID *)g.bstrVal);
+					ret.insert(ret.begin(), *(GUID *)g.bstrVal);
+					break;
 				}
 			}
+
+			ret.push_back(*(GUID *)g.bstrVal);
 		}
 		return ret;
 	}
